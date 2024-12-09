@@ -1,9 +1,10 @@
 import express from 'express';
 import { exec } from 'child_process';
+import cors from 'cors';
 
 const app = express();
 const PORT = 3000;
-
+app.use(cors());
 /**
  * Procesa la salida del comando `ps -aux` en Linux.
  * Convierte la salida de texto en un arreglo de objetos.
