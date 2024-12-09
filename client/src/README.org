@@ -1,0 +1,64 @@
+* ProcessHood 
+
+Simulacion de procesos de Sitemas Operativos
+
+Este proyecto utiliza Bun.js para cliente y NPM para el backend.
+
+** Requisitos
+
+- Tener [Bun.js](https://bun.sh) instalado en tu máquina. Puedes instalarlo con el siguiente comando:
+
+  #+BEGIN_SRC bash
+  curl -fsSL https://bun.sh/install | bash
+  #+END_SRC
+
+** Instalación
+
+1. Clona este repositorio:
+
+   #+BEGIN_SRC bash
+   git clone https://github.com/Natzgun/ProcessHood.git
+   #+END_SRC
+
+2. Navega al directorio del proyecto:
+
+   #+BEGIN_SRC bash
+   cd client
+   #+END_SRC
+
+3. Instala las dependencias con Bun.js:
+
+   #+BEGIN_SRC bash
+   bun install
+   #+END_SRC
+
+** Ejecutar el Proyecto
+
+Para iniciar el servidor o ejecutar el script principal, usa:
+
+   #+BEGIN_SRC bash
+   bun run dev
+   #+END_SRC
+
+** EJECUTAR BACKEND
+
+El backend esta en express.js
+
+   #+BEGIN_SRC bash
+   cd server
+   npm install
+   #+END_SRC
+
+** Desarrollo
+
+Si necesitas correr el proyecto en modo de desarrollo con recarga automática, usa:
+
+   #+BEGIN_SRC bash
+   npm run dev
+   #+END_SRC
+
+Esto iniciará el servidor y observará los cambios en el código.
+
+** Contribuciones
+
+Si deseas contribuir a este proyecto, por favor abre un **Pull Request**. Asegúrate de probar tu código antes de enviarlo.
