@@ -1,21 +1,16 @@
 {
   "name": "processhood",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "private": true,
+  "version": "0.0.0",
+  "type": "module",
   "scripts": {
-    "dev": "nodemon src/index.js",
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "express": "^4.21.1"
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview"
   },
   "devDependencies": {
-    "nodemon": "^2.0.22"
-  },
-  "type": "module"
+    "@sveltejs/vite-plugin-svelte": "^5.0.0",
+    "svelte": "^5.2.7",
+    "vite": "^6.0.1"
+  }
 }
-
