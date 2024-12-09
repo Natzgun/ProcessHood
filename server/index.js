@@ -79,7 +79,7 @@ function fetchProcesses() {
 /**
  * Endpoint para obtener los procesos del sistema.
  */
-app.get('/processes', async (req, res) => {
+app.get('/api/processes', async (req, res) => {
   try {
     const processes = await fetchProcesses();
     res.status(200).json({
