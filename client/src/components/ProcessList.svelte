@@ -10,6 +10,7 @@
     if (response.success) {
       procesos = response.data;
     }
+    procesos = response.data.sort((a, b) => parseInt(a.pid) - parseInt(b.pid));
   });
 
   function abrirModal(proceso) {
