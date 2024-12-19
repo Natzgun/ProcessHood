@@ -1,26 +1,20 @@
 import express from 'express';
-import {exec} from 'child_process';
+import { exec } from 'child_process';
 import cors from 'cors';
-
 
 const app = express();
 const PORT = 3000;
 app.use(cors());
-
 app.use(express.json());
 
-/**
- * Procesa la salida del comando `ps -eo pid,stat,comm,%cpu,priority` en Linux.
- * Convierte la salida de texto en un arreglo de objetos con detalles de los procesos.
- */
 function parseLinuxProcesses(stdout) {
-  const lines = stdout.split('\n').slice(1); // Ignorar encabezado
+  const lines = stdout.split('\n').slice(1);
   return lines.map(line => {
     const parts = line.trim().split(/\s+/);
     if (parts.length >= 5) {
       return {
         pid: parts[0],
-        state: parts[1], // Estado del proceso (R, S, etc.)
+        state: parts[1],
         command: parts[2],
         cpu: parseFloat(parts[3]) || parseFloat(Math.random() * 10).toFixed(3),
         priority: parseInt(parts[4]) || 0,
@@ -31,33 +25,24 @@ function parseLinuxProcesses(stdout) {
   }).filter(Boolean);
 }
 
-/**
- * Procesa la salida del comando `wmic process get` en Windows.
- * Convierte la salida de texto en un arreglo de objetos con detalles de los procesos.
- */
 function parseWindowsProcesses(stdout) {
-  const lines = stdout.trim().split('\n').slice(1); // Ignorar encabezado
+  const lines = stdout.trim().split('\n').slice(1);
   return lines.map(line => {
-    const parts = line.trim().match(/(.+?)\s+(\d+)$/); // Captura el nombre del proceso y el PID
+    const parts = line.trim().match(/(.+?)\s+(\d+)$/);
     if (parts && parts.length === 3) {
       return {
-        command: parts[1].trim(), // Nombre del proceso
-        pid: parts[2], // PID
-        state: 'running', // Inferir estado como "running" (WMIC no incluye estado directamente)
-        cpu: parseFloat((Math.random() * 10).toFixed(2)), // Simular uso de CPU
-        priority: Math.floor(Math.random() * 10), // Generar prioridad aleatoria
-        arrivalTime: Math.floor(Math.random() * 100), // Generar tiempo de llegada aleatorio
+        command: parts[1].trim(),
+        pid: parts[2],
+        state: 'running',
+        cpu: parseFloat((Math.random() * 10).toFixed(2)),
+        priority: Math.floor(Math.random() * 10),
+        arrivalTime: Math.floor(Math.random() * 100),
       };
     }
     return null;
   }).filter(Boolean);
 }
 
-
-/**
- * Obtiene los procesos del sistema operativo actual.
- * @returns {Promise<Array>} Promesa que resuelve con un arreglo de procesos.
- */
 function fetchProcesses() {
   const isWindows = process.platform === 'win32';
   const command = isWindows ? 'wmic process get ProcessId,CommandLine' : 'ps -eo pid,stat,comm,%cpu,priority';
@@ -74,12 +59,6 @@ function fetchProcesses() {
   });
 }
 
-/**
- * Simula el algoritmo Round Robin.
- * @param {Array} processes - Lista de procesos.
- * @param {number} quantum - Quantum de tiempo para la CPU.
- * @returns {Array} Resultados de la simulación.
- */
 function simulateRoundRobin(processes, quantum) {
   let time = 0;
   const queue = [...processes];
@@ -106,11 +85,6 @@ function simulateRoundRobin(processes, quantum) {
   return result;
 }
 
-/**
- * Simula el algoritmo FCFS.
- * @param {Array} processes - Lista de procesos.
- * @returns {Array} Resultados de la simulación.
- */
 function simulateFCFS(processes) {
   let time = 0;
   return processes.map(process => {
@@ -126,11 +100,6 @@ function simulateFCFS(processes) {
   });
 }
 
-/**
- * Simula el algoritmo de planificación por prioridad.
- * @param {Array} processes - Lista de procesos.
- * @returns {Array} Resultados de la simulación.
- */
 function simulatePriorityScheduling(processes) {
   let time = 0;
   const sortedProcesses = [...processes].sort((a, b) => a.priority - b.priority);
@@ -147,48 +116,54 @@ function simulatePriorityScheduling(processes) {
   });
 }
 
-/**
- * Endpoint para obtener los procesos del sistema.
- */
+function simulateMultiCPU(processes, algorithm, quantum, numCPUs) {
+  const cpuQueues = Array.from({ length: numCPUs }, () => []);
+  processes.forEach((process, index) => {
+    cpuQueues[index % numCPUs].push(process);
+  });
+
+  const results = cpuQueues.map(queue => {
+    switch (algorithm) {
+      case 'RoundRobin':
+        return simulateRoundRobin(queue, quantum);
+      case 'FCFS':
+        return simulateFCFS(queue);
+      case 'PriorityScheduling':
+        return simulatePriorityScheduling(queue);
+      default:
+        throw new Error('Algoritmo no soportado.');
+    }
+  });
+
+  return results.flat();
+}
+
 app.get('/api/processes', async (req, res) => {
   try {
     const processes = await fetchProcesses();
-    res.status(200).json({success: true, data: processes});
+    res.status(200).json({ success: true, data: processes });
   } catch (error) {
-    res.status(500).json({success: false, message: error.message});
+    res.status(500).json({ success: false, message: error.message });
   }
 });
 
-/**
- * Endpoint para simular algoritmos de planificación.
- */
 app.post('/api/simulate', (req, res) => {
-  const {algorithm, processes, quantum} = req.body;
+  const { algorithm, processes, quantum, numCPUs } = req.body;
 
   if (!processes || !Array.isArray(processes)) {
-    return res.status(400).json({success: false, message: 'Lista de procesos inválida.'});
+    return res.status(400).json({ success: false, message: 'Lista de procesos inválida.' });
   }
 
-  let result;
-  switch (algorithm) {
-    case 'RoundRobin':
-      if (typeof quantum !== 'number' || quantum <= 0) {
-        return res.status(400).json({success: false, message: 'Quantum inválido para Round Robin.'});
-      }
-      result = simulateRoundRobin(processes, quantum);
-      break;
-    case 'FCFS':
-      result = simulateFCFS(processes);
-      break;
-    case 'PriorityScheduling':
-      result = simulatePriorityScheduling(processes);
-      break;
-
-    default:
-      return res.status(400).json({success: false, message: 'Algoritmo no soportado.'});
+  if (typeof numCPUs !== 'number' || numCPUs <= 0) {
+    return res.status(400).json({ success: false, message: 'Número de CPUs inválido.' });
   }
 
-  res.status(200).json({success: true, data: result});
+  try {
+    const result = simulateMultiCPU(processes, algorithm, quantum, numCPUs);
+    res.status(200).json({ success: true, data: result });
+  } catch (error) {
+    res.status(500).json({ success: false, message: error.message });
+  }
 });
 
 app.listen(PORT, () => {

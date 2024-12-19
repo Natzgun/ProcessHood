@@ -2,28 +2,13 @@
   import { onMount } from 'svelte';
   import { writable } from 'svelte/store';
 
-  const processes = writable([]);
-  const results = writable([]);
+  let processes = writable([]);
+  let results = writable([]);
   let newProcess = { pid: '', state: '', cpu: '', priority: '', arrivalTime: '' };
-  let quantum = 4;
-  let algorithm = 'RoundRobin';
   let pidToDelete = '';
-
-  function mapProcessState(state) {
-    const stateDescriptions = {
-      S: "Durmiendo",
-      Ss: "Durmiendo (líder de sesión)",
-      "S<": "Durmiendo (alta prioridad)",
-      I: "Inactivo",
-      "I<": "Inactivo (alta prioridad)",
-      R: "Ejecutándose",
-      "R+": "Ejecutándose",
-      D: "Espera ininterrumpible",
-      Z: "Zombie",
-      T: "Detenido",
-    };
-    return stateDescriptions[state] || "Desconocido";
-  }
+  let algorithm = 'RoundRobin';
+  let quantum = 1;
+  let numCPUs = 1;
 
   async function loadProcesses() {
     try {
@@ -33,7 +18,7 @@
         processes.set(data.data);
       }
     } catch (error) {
-      console.error('Error al cargar los procesos:', error);
+      console.error('Error loading processes:', error);
     }
   }
 
@@ -50,14 +35,14 @@
   }
 
   function deleteProcessByPid() {
-    processes.update(current => current.filter(process => process.pid !== pidToDelete));
+    processes.update(current => current.filter(p => p.pid !== pidToDelete));
     pidToDelete = '';
   }
 
   async function simulate() {
     const processesData = $processes.map(p => ({
       pid: p.pid,
-      rafaga: parseFloat(p.cpu) || 1, // Usar CPU como "ráfaga" de ejemplo
+      rafaga: parseFloat(p.cpu) || 1,
       priority: p.priority,
       arrivalTime: p.arrivalTime,
     }));
@@ -66,7 +51,7 @@
       const response = await fetch('http://localhost:3000/api/simulate', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ algorithm, processes: processesData, quantum }),
+        body: JSON.stringify({ algorithm, processes: processesData, quantum, numCPUs }),
       });
       const data = await response.json();
       if (data.success) {
@@ -100,7 +85,7 @@
     {#each $processes as process}
       <tr class="hover:bg-gray-50">
         <td class="border border-gray-300 px-4 py-2">{process.pid}</td>
-        <td class="border border-gray-300 px-4 py-2">{mapProcessState(process.state)}</td>
+        <td class="border border-gray-300 px-4 py-2">{process.state}</td>
         <td class="border border-gray-300 px-4 py-2">{process.cpu}</td>
         <td class="border border-gray-300 px-4 py-2">{process.priority}</td>
         <td class="border border-gray-300 px-4 py-2">{process.arrivalTime}</td>
@@ -158,26 +143,33 @@
         <input type="number" bind:value={quantum} min="1" class="w-full border rounded p-2" />
       </label>
     {/if}
+    <label class="block">
+      Número de CPUs:
+      <input type="number" bind:value={numCPUs} min="1" class="w-full border rounded p-2" />
+    </label>
   </div>
   <button on:click={simulate} class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4">Simular</button>
 
   <h2 class="text-xl font-semibold my-4">Resultados</h2>
-  <table class="table-auto w-full border-collapse border border-gray-300">
-    <thead>
-    <tr class="bg-gray-100">
-      <th class="border border-gray-300 px-4 py-2">PID</th>
-      <th class="border border-gray-300 px-4 py-2">Inicio</th>
-      <th class="border border-gray-300 px-4 py-2">Fin</th>
-    </tr>
-    </thead>
-    <tbody>
-    {#each $results as result}
-      <tr class="hover:bg-gray-50">
-        <td class="border border-gray-300 px-4 py-2">{result.pid}</td>
-        <td class="border border-gray-300 px-4 py-2">{result.startTime}</td>
-        <td class="border border-gray-300 px-4 py-2">{result.endTime}</td>
+  {#each Array(numCPUs).fill().map((_, i) => i) as cpuIndex}
+    <h3 class="text-lg font-semibold my-2">CPU {cpuIndex + 1}</h3>
+    <table class="table-auto w-full border-collapse border border-gray-300 mb-4">
+      <thead>
+      <tr class="bg-gray-100">
+        <th class="border border-gray-300 px-4 py-2">PID</th>
+        <th class="border border-gray-300 px-4 py-2">Inicio</th>
+        <th class="border border-gray-300 px-4 py-2">Fin</th>
       </tr>
-    {/each}
-    </tbody>
-  </table>
+      </thead>
+      <tbody>
+      {#each $results.filter(r => r.cpu === cpuIndex) as result}
+        <tr class="hover:bg-gray-50">
+          <td class="border border-gray-300 px-4 py-2">{result.pid}</td>
+          <td class="border border-gray-300 px-4 py-2">{result.startTime}</td>
+          <td class="border border-gray-300 px-4 py-2">{result.endTime}</td>
+        </tr>
+      {/each}
+      </tbody>
+    </table>
+  {/each}
 </div>
