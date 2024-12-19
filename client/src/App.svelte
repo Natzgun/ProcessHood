@@ -7,7 +7,7 @@
   let newProcess = { pid: '', state: '', cpu: '', priority: '', arrivalTime: '' };
   let quantum = 4;
   let algorithm = 'RoundRobin';
-  let cpuCount = 1; // Cantidad de CPUs especificada por el usuario
+  let cpuCount = 1;
   let pidToDelete = '';
 
   function mapProcessState(state) {
@@ -58,7 +58,7 @@
   async function simulate() {
     const processesData = $processes.map(p => ({
       pid: p.pid,
-      rafaga: parseFloat(p.cpu) || 1, // Usar CPU como "ráfaga" de ejemplo
+      rafaga: parseFloat(p.cpu) || 1,
       priority: p.priority,
       arrivalTime: p.arrivalTime,
     }));
