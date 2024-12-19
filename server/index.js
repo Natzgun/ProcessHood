@@ -36,14 +36,14 @@ function parseLinuxProcesses(stdout) {
  * Convierte la salida de texto en un arreglo de objetos con detalles de los procesos.
  */
 function parseWindowsProcesses(stdout) {
-  const lines = stdout.split('\n').slice(1); // Ignorar encabezado
+  const lines = stdout.trim().split('\n').slice(1); // Ignorar encabezado
   return lines.map(line => {
-    const parts = line.trim().split(/\s+/);
-    if (parts.length >= 2) {
+    const parts = line.trim().match(/(.+?)\s+(\d+)$/); // Captura el nombre del proceso y el PID
+    if (parts && parts.length === 3) {
       return {
-        pid: parts[0],
+        command: parts[1].trim(), // Nombre del proceso
+        pid: parts[2], // PID
         state: 'running', // Inferir estado como "running" (WMIC no incluye estado directamente)
-        command: parts[1],
         cpu: parseFloat((Math.random() * 10).toFixed(2)), // Simular uso de CPU
         priority: Math.floor(Math.random() * 10), // Generar prioridad aleatoria
         arrivalTime: Math.floor(Math.random() * 100), // Generar tiempo de llegada aleatorio
@@ -52,6 +52,7 @@ function parseWindowsProcesses(stdout) {
     return null;
   }).filter(Boolean);
 }
+
 
 /**
  * Obtiene los procesos del sistema operativo actual.
