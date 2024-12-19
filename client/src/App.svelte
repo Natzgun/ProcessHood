@@ -17,6 +17,7 @@
       I: "Inactivo",
       "I<": "Inactivo (alta prioridad)",
       R: "Ejecutándose",
+      "R+": "Ejecutándose",
       D: "Espera ininterrumpible",
       Z: "Zombie",
       T: "Detenido",
