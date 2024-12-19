@@ -137,6 +137,15 @@
 </script>
 
 <div class="container mx-auto p-4">
+  <div class="text-center">
+  <h1 class="text-2xl font-bold mb-4 text-blue-500">PROCESS HOOD</h1>
+</div>
+<div class="absolute top-2 right-2 text-gray-500 italic">
+  <span>BY:</span>
+  <span>- Erick Malcoaccha</span><br>
+  <span>- Erik Ramos</span><br>
+  <span>- Josue Philco</span>
+</div>
   <h1 class="text-2xl font-bold mb-4">Simulación de Planificación de Procesos</h1>
 
   <h2 class="text-xl font-semibold mb-2">Procesos actuales</h2>
