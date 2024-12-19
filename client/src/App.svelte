@@ -50,6 +50,7 @@
 
   function deleteAllProcesses() {
     processes.set([]);
+
   }
 
   function deleteProcessByPid() {
@@ -58,6 +59,7 @@
   }
 
   async function simulate() {
+    results.set([]);
     const processesData = $processes.map(p => ({
       pid: p.pid,
       rafaga: parseFloat(p.cpu) || 1,
@@ -99,6 +101,7 @@
             backgroundColor: 'rgba(75, 192, 192, 0.2)',
             borderColor: 'rgba(75, 192, 192, 1)',
             borderWidth: 1,
+            //FIX ERROR CODE
             datalabels: {
               anchor: 'end',
               align: 'end',
