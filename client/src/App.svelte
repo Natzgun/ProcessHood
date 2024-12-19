@@ -114,7 +114,32 @@
   <button on:click={loadProcesses} class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 mb-4">Recargar Procesos del SO</button>
   <button on:click={deleteAllProcesses} class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 mb-4">Eliminar Todos los Procesos</button>
 
-  <h2 class="text-xl font-semibold my-4">Configuración de Simulación</h2>
+    <h2 class="text-xl font-semibold mb-2">Agregar Proceso</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
+        <label class="block">
+            PID:
+            <input type="text" bind:value={newProcess.pid} class="w-full border rounded p-2" />
+        </label>
+        <label class="block">
+            Estado:
+            <input type="text" bind:value={newProcess.state} class="w-full border rounded p-2" />
+        </label>
+        <label class="block">
+            CPU:
+            <input type="number" bind:value={newProcess.cpu} class="w-full border rounded p-2" />
+        </label>
+        <label class="block">
+            Prioridad:
+            <input type="number" bind:value={newProcess.priority} class="w-full border rounded p-2" />
+        </label>
+        <label class="block">
+            Tiempo de Llegada:
+            <input type="number" bind:value={newProcess.arrivalTime} class="w-full border rounded p-2" />
+        </label>
+    </div>
+    <button on:click={addProcess} class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Agregar</button>
+
+    <h2 class="text-xl font-semibold my-4">Configuración de Simulación</h2>
   <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
     <label class="block">
       Cantidad de CPUs:
@@ -136,27 +161,6 @@
     {/if}
   </div>
   <button on:click={simulate} class="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600 mt-4">Simular</button>
-
-  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-  <label class="block">
-    Cantidad de CPUs:
-    <input type="number" bind:value={cpuCount} min="1" class="w-full border rounded p-2" />
-  </label>
-  <label class="block">
-    Algoritmo:
-    <select bind:value={algorithm} class="w-full border rounded p-2">
-      <option value="RoundRobin">Round Robin</option>
-      <option value="FCFS">FCFS</option>
-      <option value="PriorityScheduling">Priority Scheduling</option>
-    </select>
-  </label>
-  {#if algorithm === 'RoundRobin'}
-    <label class="block">
-      Quantum:
-      <input type="number" bind:value={quantum} min="1" class="w-full border rounded p-2" />
-    </label>
-  {/if}
-</div>
 
   <h2 class="text-xl font-semibold my-4">Resultados</h2>
   {#each $results as result}
