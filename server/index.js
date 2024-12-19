@@ -162,33 +162,61 @@ app.get('/api/processes', async (req, res) => {
 /**
  * Endpoint para simular algoritmos de planificación.
  */
+/**
+ * Divide los procesos en N listas para simular múltiples CPUs.
+ * @param {Array} processes - Lista de procesos.
+ * @param {number} cpuCount - Número de CPUs.
+ * @returns {Array} Arreglo de listas de procesos divididos por CPU.
+ */
+function divideProcesses(processes, cpuCount) {
+  const divided = Array.from({ length: cpuCount }, () => []);
+  processes.forEach((process, index) => {
+    divided[index % cpuCount].push(process);
+  });
+  return divided;
+}
+
+/**
+ * Endpoint para simular algoritmos de planificación con múltiples CPUs.
+ */
 app.post('/api/simulate', (req, res) => {
-  const {algorithm, processes, quantum} = req.body;
+  const { algorithm, processes, quantum, cpuCount } = req.body;
 
   if (!processes || !Array.isArray(processes)) {
-    return res.status(400).json({success: false, message: 'Lista de procesos inválida.'});
+    return res.status(400).json({ success: false, message: 'Lista de procesos inválida.' });
   }
 
-  let result;
-  switch (algorithm) {
-    case 'RoundRobin':
-      if (typeof quantum !== 'number' || quantum <= 0) {
-        return res.status(400).json({success: false, message: 'Quantum inválido para Round Robin.'});
-      }
-      result = simulateRoundRobin(processes, quantum);
-      break;
-    case 'FCFS':
-      result = simulateFCFS(processes);
-      break;
-    case 'PriorityScheduling':
-      result = simulatePriorityScheduling(processes);
-      break;
-
-    default:
-      return res.status(400).json({success: false, message: 'Algoritmo no soportado.'});
+  if (typeof cpuCount !== 'number' || cpuCount <= 0) {
+    return res.status(400).json({ success: false, message: 'Número de CPUs inválido.' });
   }
 
-  res.status(200).json({success: true, data: result});
+  // Dividir procesos entre las CPUs
+  const dividedProcesses = divideProcesses(processes, cpuCount);
+
+  let results = [];
+  dividedProcesses.forEach((cpuProcesses, index) => {
+    let cpuResult;
+    switch (algorithm) {
+      case 'RoundRobin':
+        if (typeof quantum !== 'number' || quantum <= 0) {
+          return res.status(400).json({ success: false, message: 'Quantum inválido para Round Robin.' });
+        }
+        cpuResult = simulateRoundRobin(cpuProcesses, quantum);
+        break;
+      case 'FCFS':
+        cpuResult = simulateFCFS(cpuProcesses);
+        break;
+      case 'PriorityScheduling':
+        cpuResult = simulatePriorityScheduling(cpuProcesses);
+        break;
+      default:
+        return res.status(400).json({ success: false, message: 'Algoritmo no soportado.' });
+    }
+
+    results.push({ cpu: index + 1, processes: cpuResult });
+  });
+
+  res.status(200).json({ success: true, data: results });
 });
 
 app.listen(PORT, () => {
